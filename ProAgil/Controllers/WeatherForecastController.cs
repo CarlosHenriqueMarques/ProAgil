@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ProAgil.Data;
 using ProAgil.Model;
 
 namespace ProAgil.Controllers
@@ -12,50 +14,29 @@ namespace ProAgil.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
+        public readonly DataContext _context;
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, DataContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        [HttpGet]
-        public IEnumerable<Evento> Get()
-        { /*
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();*/
-            return new Evento[]
+                var result = await _context.Eventos.FirstOrDefaultAsync(x => x.EventoId == id);
+                return Ok(result);
+            }
+            catch (System.Exception)
             {
-                new Evento()
-                {
-                    EventoId =1,
-                    Tema = "Angular e .NET core",
-                    Local = "Toronto",
-                    Lote = "5",
-                    QtdPessoas = 250,
-                    DataEvento = DateTime.Now.AddDays(2).ToString("dd/MM/yyyy")
-                },
-                new Evento()
-                {
-                    EventoId =2,
-                    Tema = "Angular",
-                    Local = "Waterloo",
-                    Lote = "6",
-                    QtdPessoas = 800,
-                    DataEvento = DateTime.Now.AddDays(3).ToString("dd/MM/yyyy")
-                }
-            };
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Banco Dados Falhou");
+            }
+            
         }
     }
 }
