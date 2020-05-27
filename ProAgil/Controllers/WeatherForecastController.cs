@@ -23,12 +23,12 @@ namespace ProAgil.Controllers
             _context = context;
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        [HttpGet("")]
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var result = await _context.Eventos.FirstOrDefaultAsync(x => x.EventoId == id);
+                var result = await _context.Eventos.ToListAsync();
                 return Ok(result);
             }
             catch (System.Exception)
